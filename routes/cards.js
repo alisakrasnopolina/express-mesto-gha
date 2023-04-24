@@ -1,36 +1,16 @@
 const router = require('express').Router();
-const Card = require('../models/card');
+const {
+  getCards,
+  createCard,
+  deleteCardById,
+  likeCard,
+  dislikeCard,
+} = require('../controllers/cards');
 
-router.get('/cards', (req, res) => {
-  Card.find({})
-    .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err}` }));
-});
-
-router.post('/cards', (req, res) => {
-  const { name, link } = req.body;
-
-  Card.create({ name, link })
-    .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err}` }));
-});
-
-router.delete('/cards/:cardId', (req, res) => {
-  Card.findByIdAndRemove(req.params._id)
-    .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err}` }));
-});
-
-router.put('/cards/:cardId/likes', (req, res) => {
-  Card.findByIdAndUpdate(req.user._id)
-    .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err}` }));
-});
-
-router.delete('/cards/:cardId/likes', (req, res) => {
-  Card.findByIdAndRemove(req.user._id)
-    .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err}` }));
-});
+router.get('/cards', getCards);
+router.post('/cards', createCard);
+router.delete('/cards/:cardId', deleteCardById);
+router.put('/cards/:cardId/likes', likeCard);
+router.delete('/cards/:cardId/likes', dislikeCard);
 
 module.exports = router;
