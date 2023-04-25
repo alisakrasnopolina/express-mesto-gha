@@ -11,7 +11,6 @@ const createCard = require('./routes/cards');
 const deleteCardById = require('./routes/cards');
 const likeCard = require('./routes/cards');
 const dislikeCard = require('./routes/cards');
-const { handleErrors } = require('./erorrs');
 
 const { PORT = 3000 } = process.env;
 const app = express();
