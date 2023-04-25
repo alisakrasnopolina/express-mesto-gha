@@ -1,20 +1,12 @@
 const mongoose = require('mongoose');
 
 const STATUS_BAD_REQUEST = 400;
-const STATUS_NOT_FOUND = 404; // ERROR_NOT_FOUND
+const STATUS_NOT_FOUND = 404;
 const STATUS_INTERNAL_SERVER_ERROR = 500;
-const { CastError, ValidationError } = mongoose.Error;
-
-class NotFoundError extends Error {
-  constructor(message) {
-    super(message);
-    this.statusCode = 404;
-    this.name = 'NotFoundError';
-  }
-}
+const { CastError, ValidationError, DocumentNotFoundError } = mongoose.Error;
 
 const handleErrors = (err, res) => {
-  if (err instanceof NotFoundError) {
+  if (err instanceof DocumentNotFoundError) {
     return res.status(STATUS_NOT_FOUND).send({ message: 'Данные не найдены!' });
   }
   if (err instanceof CastError || err instanceof ValidationError) {
@@ -22,5 +14,4 @@ const handleErrors = (err, res) => {
   }
   return res.status(STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка!' });
 };
-
 module.exports = { handleErrors };
