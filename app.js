@@ -11,6 +11,7 @@ const createCard = require('./routes/cards');
 const deleteCardById = require('./routes/cards');
 const likeCard = require('./routes/cards');
 const dislikeCard = require('./routes/cards');
+const { handleErrors } = require('./erorrs');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -45,5 +46,9 @@ app.use('/', createCard);
 app.use('/', deleteCardById);
 app.use('/', likeCard);
 app.use('/', dislikeCard);
+
+app.use('*', (req, res) => {
+  res.status(404).send({ message: 'Данные не найдены!' });
+});
 
 app.listen(PORT);
