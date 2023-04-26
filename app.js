@@ -1,22 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const getUsers = require('./routes/users');
-const getUserById = require('./routes/users');
-const createUser = require('./routes/users');
-const updateProfile = require('./routes/users');
-const updateAvatar = require('./routes/users');
-const getCards = require('./routes/cards');
-const createCard = require('./routes/cards');
-const deleteCardById = require('./routes/cards');
-const likeCard = require('./routes/cards');
-const dislikeCard = require('./routes/cards');
+const routerUsers = require('./routes/users');
+const routerCards = require('./routes/cards');
 
+const STATUS_NOT_FOUND = 404;
 const { PORT = 3000 } = process.env;
 const app = express();
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
@@ -34,20 +26,12 @@ const owner = (req, res, next) => {
 
 app.use(owner);
 
-app.use('/', getUsers);
-app.use('/', getUserById);
-app.use('/', createUser);
-app.use('/', updateProfile);
-app.use('/', updateAvatar);
+app.use('/', routerUsers);
 
-app.use('/', getCards);
-app.use('/', createCard);
-app.use('/', deleteCardById);
-app.use('/', likeCard);
-app.use('/', dislikeCard);
+app.use('/', routerCards);
 
 app.use('*', (req, res) => {
-  res.status(404).send({ message: 'Данные не найдены!' });
+  res.status(STATUS_NOT_FOUND).send({ message: 'Данные не найдены!' });
 });
 
 app.listen(PORT);

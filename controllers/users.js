@@ -1,6 +1,8 @@
 const { handleErrors } = require('../erorrs');
 const User = require('../models/user');
 
+const STATUS_CREATED = 201;
+
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((user) => res.send({ data: user }))
@@ -18,7 +20,7 @@ module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
   User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.status(STATUS_CREATED).send({ data: user }))
     .catch((err) => handleErrors(err, res));
 };
 
