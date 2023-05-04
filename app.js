@@ -50,8 +50,9 @@ app.use('*', (req, res) => {
 
 app.use(errors());
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   handleErrors(err, res);
+  next();
 });
 
 app.listen(PORT);
