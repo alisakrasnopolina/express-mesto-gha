@@ -6,6 +6,20 @@ const { ValidationError } = mongoose.Error;
 const { UnauthorizedError } = require('../erorrs');
 
 const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: {
+      validator: (email) => validator.isEmail(email),
+      message: 'Такого адреса электронной почты не существует.',
+    },
+  },
+  password: {
+    type: String,
+    required: true,
+    select: false,
+  },
   name: {
     type: String,
     default: 'Жак-Ив Кусто',
@@ -26,21 +40,7 @@ const userSchema = new mongoose.Schema({
     },
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    validate: {
-      validator: (email) => validator.isEmail(email),
-      message: 'Такого адреса электронной почты не существует.',
-    },
-  },
-  password: {
-    type: String,
-    required: true,
-    select: false,
-  },
-});
+}, { toJSON: { useProjection: true }, toObject: { useProjection: true } });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
   const isEmailVallid = validator.isEmail(email);
