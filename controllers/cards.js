@@ -1,15 +1,9 @@
 const mongoose = require('mongoose');
 const Card = require('../models/card');
 
+const STATUS_FORBIDDEN = 403;
 const STATUS_CREATED = 201;
 const { DocumentNotFoundError } = mongoose.Error;
-
-class ForbiddenError extends Error {
-  constructor(message) {
-    super(message);
-    this.statusCode = 403;
-  }
-}
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -41,7 +35,7 @@ module.exports.deleteCardById = (req, res, next) => {
           .then(res.send({ data: card }))
           .catch(next);
       } else {
-        throw new ForbiddenError('Доступ запрещён.');
+        res.status(STATUS_FORBIDDEN).send({ message: 'Доступ запрещён.' });
       }
     })
     .catch(next);
