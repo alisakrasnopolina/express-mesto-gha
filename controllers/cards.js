@@ -1,7 +1,15 @@
+const mongoose = require('mongoose');
 const Card = require('../models/card');
 
 const STATUS_CREATED = 201;
-const { UnauthorizedError } = require('../erorrs');
+const { DocumentNotFoundError } = mongoose.Error;
+
+class ForbiddenError extends Error {
+  constructor(message) {
+    super(message);
+    this.statusCode = 403;
+  }
+}
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -23,6 +31,9 @@ module.exports.createCard = (req, res, next) => {
 module.exports.deleteCardById = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
+      if (!card) {
+        throw new DocumentNotFoundError();
+      }
       if (req.user._id === card.owner._id.toString()) {
         Card.findByIdAndRemove(req.params.cardId)
           .orFail()
@@ -30,7 +41,7 @@ module.exports.deleteCardById = (req, res, next) => {
           .then(res.send({ data: card }))
           .catch(next);
       } else {
-        throw new UnauthorizedError('Доступ запрещён.');
+        throw new ForbiddenError('Доступ запрещён.');
       }
     })
     .catch(next);
