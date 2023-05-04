@@ -1,12 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+const { celebrate, Joi } = require('celebrate');
+const { errors } = require('celebrate');
 const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
+const { login, createUser } = require('./controllers/users');
+const auth = require('./middlewares/auth');
+const { STATUS_NOT_FOUND, handleErrors } = require('./erorrs');
 
-const STATUS_NOT_FOUND = 404;
 const { PORT = 3000 } = process.env;
 const app = express();
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -16,15 +22,20 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   // useFindAndModify: false,
 });
 
-const owner = (req, res, next) => {
-  req.user = {
-    _id: '6443b4aa1bf87bb0b16960b6',
-  };
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), createUser);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), login);
 
-  next();
-};
-
-app.use(owner);
+app.use(auth);
 
 app.use('/', routerUsers);
 
@@ -32,6 +43,12 @@ app.use('/', routerCards);
 
 app.use('*', (req, res) => {
   res.status(STATUS_NOT_FOUND).send({ message: 'Данные не найдены!' });
+});
+
+app.use(errors());
+
+app.use((err, req, res, next) => {
+  handleErrors(err, res);
 });
 
 app.listen(PORT);
