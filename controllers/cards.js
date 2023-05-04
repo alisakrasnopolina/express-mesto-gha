@@ -1,6 +1,7 @@
 const Card = require('../models/card');
 
 const STATUS_CREATED = 201;
+const { UnauthorizedError } = require('../erorrs');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -20,10 +21,18 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCardById = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .orFail()
-    .populate(['owner', 'likes'])
-    .then((card) => res.send({ data: card }))
+  Card.findById(req.params.cardId)
+    .then((card) => {
+      if (req.user._id === card.owner._id.toString()) {
+        Card.findByIdAndRemove(req.params.cardId)
+          .orFail()
+          .populate(['owner', 'likes'])
+          .then(res.send({ data: card }))
+          .catch(next);
+      } else {
+        throw new UnauthorizedError('Доступ запрещён.');
+      }
+    })
     .catch(next);
 };
 

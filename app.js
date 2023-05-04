@@ -44,11 +44,11 @@ app.use('/', routerUsers);
 
 app.use('/', routerCards);
 
+app.use(errors());
+
 app.use('*', (req, res) => {
   res.status(STATUS_NOT_FOUND).send({ message: 'Данные не найдены!' });
 });
-
-app.use(errors());
 
 app.use((err, req, res, next) => {
   handleErrors(err, res);

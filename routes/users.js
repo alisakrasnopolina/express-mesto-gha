@@ -9,12 +9,12 @@ const {
 } = require('../controllers/users');
 
 router.get('/users', getUsers);
+router.get('/users/me', getUser);
 router.get('/users/:userId', celebrate({
   params: Joi.object().keys({
     userId: Joi.string().alphanum().length(24),
   }),
 }), getUserById);
-router.get('/users/me', getUser);
 router.patch('/users/me', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
