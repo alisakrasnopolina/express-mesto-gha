@@ -50,7 +50,7 @@ app.use('*', (req, res) => {
 
 app.use(errors());
 
-app.use((err, req, next, res) => {
+app.use((err, req, res) => {
   handleErrors(err, res);
 });
 
