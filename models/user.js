@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
 
-const { ValidationError } = mongoose.Error;
-const { UnauthorizedError } = require('../erorrs');
+const { UnauthorizedError } = require('../errors/erorrs');
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -43,11 +42,6 @@ const userSchema = new mongoose.Schema({
 }, { toJSON: { useProjection: true }, toObject: { useProjection: true } });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
-  const isEmailVallid = validator.isEmail(email);
-  if (!isEmailVallid) {
-    return Promise.reject(new ValidationError());
-  }
-
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {

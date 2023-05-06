@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
 
 const STATUS_BAD_REQUEST = 400;
-const STATUS_CONFLICT = 409;
 const STATUS_UNAUTHORIZED = 401;
+const STATUS_FORBIDDEN = 403;
 const STATUS_NOT_FOUND = 404;
+const STATUS_CONFLICT = 409;
 const STATUS_INTERNAL_SERVER_ERROR = 500;
 const { CastError, ValidationError, DocumentNotFoundError } = mongoose.Error;
+const ForbiddenError = require('./forbidden_error');
 
 class UnauthorizedError extends Error {
   constructor(message) {
@@ -27,7 +29,10 @@ const handleErrors = (err, res) => {
   if (err instanceof UnauthorizedError) {
     return res.status(STATUS_UNAUTHORIZED).send({ message: err.message });
   }
+  if (err instanceof ForbiddenError) {
+    return res.status(STATUS_FORBIDDEN).send({ message: err.message });
+  }
   return res.status(STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка!' });
 };
 
-module.exports = { handleErrors, UnauthorizedError, STATUS_NOT_FOUND };
+module.exports = { handleErrors, UnauthorizedError };

@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 const Card = require('../models/card');
 
-const STATUS_FORBIDDEN = 403;
 const STATUS_CREATED = 201;
 const { DocumentNotFoundError } = mongoose.Error;
+const ForbiddenError = require('../errors/forbidden_error');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -29,38 +29,34 @@ module.exports.deleteCardById = (req, res, next) => {
         throw new DocumentNotFoundError();
       }
       if (req.user._id === card.owner._id.toString()) {
-        Card.findByIdAndRemove(req.params.cardId)
+        Card.deleteOne()
           .orFail()
           .populate(['owner', 'likes'])
           .then(res.send({ data: card }))
           .catch(next);
       } else {
-        res.status(STATUS_FORBIDDEN).send({ message: 'Доступ запрещён.' });
+        next(new ForbiddenError('Доступ запрещён.'));
       }
     })
     .catch(next);
 };
 
-module.exports.likeCard = (req, res, next) => {
+function likes(req, res, next, method) {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $addToSet: { likes: req.user._id } },
-    { new: true, runValidators: true },
+    method,
+    { new: true },
   )
     .orFail()
     .populate(['owner', 'likes'])
     .then((card) => res.send({ data: card }))
     .catch(next);
+}
+
+module.exports.likeCard = (req, res, next) => {
+  likes(req, res, next, { $addToSet: { likes: req.user._id } });
 };
 
 module.exports.dislikeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    { $pull: { likes: req.user._id } },
-    { new: true, runValidators: true },
-  )
-    .orFail()
-    .populate(['owner', 'likes'])
-    .then((card) => res.send({ data: card }))
-    .catch(next);
+  likes(req, res, next, { $pull: { likes: req.user._id } });
 };

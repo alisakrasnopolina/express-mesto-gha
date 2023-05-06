@@ -10,18 +10,19 @@ module.exports.getUsers = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.getUserById = (req, res, next) => {
-  User.findById(req.params.userId)
+function getUserWithId(req, res, next, id) {
+  User.findById(id)
     .orFail()
     .then((user) => res.send({ data: user }))
     .catch(next);
+}
+
+module.exports.getUserById = (req, res, next) => {
+  getUserWithId(req, res, next, req.params.userId);
 };
 
 module.exports.getUser = (req, res, next) => {
-  User.findById(req.user._id)
-    .orFail()
-    .then((user) => res.send({ data: user }))
-    .catch(next);
+  getUserWithId(req, res, next, req.user._id);
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -69,7 +70,7 @@ module.exports.login = (req, res, next) => {
           httpOnly: true,
           sameSite: true,
         })
-        .send({ token, email });
+        .send({ email });
     })
     .catch(next);
 };
